@@ -48,6 +48,33 @@ def deserialize_map(serialized_map):
 
     return deserialized_map
 
+class StateType():
+    SearchMineral, GoToMineral, MiningMineral, GoToHouse = range(4)
+
+actualState = StateType.SearchMineral
+
+xMineral = 0
+yMineral = 0
+
+def determinateActionToDo(currentState, x, y, gameInformations = 0) :
+
+    if currentState == StateType.SearchMineral or currentState == StateType.GoToMineral:
+
+        ### IF FULL
+        ### ELSE
+        ### IF MINERAL FOUND
+        global actualState
+        actualState = StateType.GoToMineral
+        if x<28 :
+            return create_move_action(Point(x+1,y))
+        elif y<34 :
+            return create_move_action(Point(x,y+1))
+        elif x==28 and y==34 :
+            return create_collect_action(Point(x,y+1))
+        ### ELIF MINERAL NOT FOUND
+        
+    return create_move_action(Point(x,y))
+
 def bot():
     """
     Main de votre bot.
@@ -89,26 +116,23 @@ def bot():
 
     # return decision
 
+    #printMap(deserialized_map,x,y)
+
     #print x
     #print y
 
-    printMap(deserialized_map,x,y)
+    
 
-    print x
-    print y
-
-    #if x == 25 : 
+    #if x<28 :
     #    return create_move_action(Point(x+1,y))
-    #if x == 26 : 
-    #    return create_move_action(Point(x-1,y))
-    if x<28 :
-        return create_move_action(Point(x+1,y))
-    elif y<34 :
-        return create_move_action(Point(x,y+1))
-    elif x==28 and y==34 :
-        return create_collect_action(Point(x,y+1))
+    #elif y<34 :
+    #    return create_move_action(Point(x,y+1))
+    #elif x==28 and y==34 :
+    #    return create_collect_action(Point(x,y+1))
+    #
+    #return create_move_action(Point(x,y-1))
 
-    return create_move_action(Point(x,y-1))
+    return determinateActionToDo(actualState,x ,y)
 
 @app.route("/", methods=["POST"])
 def reponse():
