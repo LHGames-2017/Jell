@@ -1,9 +1,11 @@
 from flask import Flask, request
 from structs import *
 import json
-import numpy
+#import numpy
 
 app = Flask(__name__)
+
+bigMap = BigMap()
 
 def create_action(action_type, target):
     actionContent = ActionContent(action_type, target.__dict__)
@@ -48,75 +50,11 @@ def deserialize_map(serialized_map):
 
     return deserialized_map
 
-class StateType():
-    SearchMineral, GoToMineral, MiningMineral, GoToHouse = range(4)
-
-actualState = StateType.SearchMineral
-
-xMineral = 0
-yMineral = 0
-
-def distEucl (x1,y1,x2,y2) :
-    delta_x = x1 - x2
-    delta_y = y1 - y2
-    return math.sqrt(math.pow(delta_x, 2) + math.pow(delta_y, 2))
-
-def determinateActionToDo(currentState, deserialized_map, x, y, gameInformations = 0) :
-
-    if currentState == StateType.SearchMineral or currentState == StateType.GoToMineral:
-
-        [xM,yM] = searchClosestMineral(deserialized_map, x, y)
-
-        ### IF FULL
-        ### ELSE
-        ### IF MINERAL FOUND
-        global actualState
-        actualState = StateType.GoToMineral
-        if distEucl(x,y,xM,yM) > 1 :
-            if x<xM :
-                return create_move_action(Point(x+1,y))
-            elif y<yM :
-                return create_move_action(Point(x,y+1))
-            elif x<xM :
-                return create_move_action(Point(x-1,y))
-            elif y<yM :
-                return create_move_action(Point(x,y-1))
-        elif distEucl(x,y,xM,yM) == 1 :
-            if x==xM-1 :
-                return create_collect_action(Point(x+1,y))
-            if x==xM+1 :
-                return create_collect_action(Point(x+1,y))
-            if y==yM-1 :
-                return create_collect_action(Point(x,y+1))
-            if y==yM-1 :
-                return create_collect_action(Point(x,y-1))
-        ### ELIF MINERAL NOT FOUND
-        
-    return create_move_action(Point(x,y))
-
-def searchClosestMineral(deserialized_map,x,y):
-    distance = 1000
-    xM = 0
-    yM = 0
-    found = False
-    for i in range(len(deserialized_map)):
-        for j in range(len(deserialized_map[i])):
-            tile = deserialized_map[i][j]
-            if tile.Content == TileContent.Resource:
-                tempDist = distEucl(xM, yM , x , y)
-                if tempDist < distance :
-                    distance = tempDist
-                    xM = deserialized_map[i][j].X
-                    yM = deserialized_map[i][j].Y 
-                    found = True
-    if found:
-        return [xM,yM]
-        
-                    
 def bot():
     """
     Main de votre bot.
     """
+
     map_json = request.form["map"]
 
     # Player info
@@ -129,16 +67,18 @@ def bot():
     y = pos["Y"]
     house = p["HouseLocation"]
     player = Player(p["Health"], p["MaxHealth"], Point(x,y),
-                    Point(house["X"], house["Y"]), p["Score"] ,
+                    Point(house["X"], house["Y"]),
                     p["CarriedResources"], p["CarryingCapacity"])
 
     # Map
     serialized_map = map_json["CustomSerializedMap"]
     deserialized_map = deserialize_map(serialized_map)
 
-    #printMap(deserialized_map)
-
     otherPlayers = []
+    
+    if not bigMap.initialized:
+        bigMap.initMap(deserialized_map)
+        bigMap.initialized = True
 
     for player_dict in map_json["OtherPlayers"]:
         for player_name in player_dict.keys():
@@ -152,25 +92,10 @@ def bot():
 
             otherPlayers.append({player_name: player_info })
 
-    # return decision
+    bigMap.updateMap(deserialized_map)
+    printMap(bigMap,x,y)
 
-    printMap(deserialized_map,x,y)
-
-    #print x
-    #print y
-
-    
-
-    #if x<28 :
-    #    return create_move_action(Point(x+1,y))
-    #elif y<34 :
-    #    return create_move_action(Point(x,y+1))
-    #elif x==28 and y==34 :
-    #    return create_collect_action(Point(x,y+1))
-    #
-    #return create_move_action(Point(x,y-1))
-
-    return determinateActionToDo(actualState,deserialized_map ,x ,y)
+    return create_move_action(Point(x-1,y))
 
 @app.route("/", methods=["POST"])
 def reponse():
@@ -181,23 +106,23 @@ def reponse():
     return bot()
 
 def printMap(deserialized_map, playerX, playerY):
-    for i in range(len(deserialized_map)):
+    for i in range(len(deserialized_map.Map)):
         line = '['
-        for j in range(len(deserialized_map[i])):
-            tile = deserialized_map[i][j]
-            if tile.Content == TileContent.Empty:
+        for j in range(len(deserialized_map.Map[i])):
+            tile = deserialized_map.Map[i][j]
+            if tile == TileContent.Empty:
                 line += ' '
-            elif tile.Content == TileContent.House:
+            elif tile == TileContent.House:
                 line += 'H'
-            elif tile.Content == TileContent.Lava:
+            elif tile == TileContent.Lava:
                 line += '~'
-            elif tile.Content == TileContent.Player:
+            elif tile == TileContent.Player:
                 line += 'o'
-            elif tile.Content == TileContent.Resource:
+            elif tile == TileContent.Resource:
                 line += '^'
-            elif tile.Content == TileContent.Shop:
+            elif tile == TileContent.Shop:
                 line += 'S'
-            elif tile.Content == TileContent.Wall:
+            elif tile == TileContent.Wall:
                 line += '@'
             else:
                 line += 'B'

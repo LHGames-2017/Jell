@@ -40,13 +40,13 @@ class Point(object):
         return math.sqrt(math.pow(delta_x, 2) + math.pow(delta_y, 2))
 
 
-class GameInfo(object):
-
-    def __init__(self, json_dict):
-        self.__dict__ = json_dict
-        self.HouseLocation = Point(json_dict["HouseLocation"])
-        self.Map = None
-        self.Players = dict()
+#class GameInfo(object):
+#
+#    def __init__(self, json_dict):
+#        self.__dict__ = json_dict
+#        self.HouseLocation = Point(json_dict["HouseLocation"])
+#        self.Map = BigMap()
+#        self.Players = dict()
 
 
 class Tile(object):
@@ -82,3 +82,28 @@ class ActionContent(object):
     def __init__(self, action_name, content):
         self.ActionName = action_name
         self.Content = str(content)
+
+    
+class BigMap(object):
+    initialized = False
+
+    def initMap(self, littleMap):
+        
+        startX = littleMap[0][0].X
+        startY = littleMap[0][0].Y
+
+        self.Map = [[TileContent.Wall for i in range(startX + 30)] for j in range(startY + 30)]
+
+        self.updateMap(littleMap)
+
+    def updateMap(self, littleMap):
+        startX = littleMap[0][0].X
+        startY = littleMap[0][0].Y
+
+        for i in range (0,len(littleMap)):
+            for j in range (0,len(littleMap[i])):
+                self.Map[startX + i][startY + j] = littleMap[i][j].Content
+
+
+
+
