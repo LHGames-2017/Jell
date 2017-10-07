@@ -113,31 +113,37 @@ def canIBuySomething(player):
 
 def determinateActionToDo(currentState, deserialized_map,player, x, y,  gameInformations = 0) :
 
+    global xMineral
+    global yMineral
+    global actualState
+
     xH = player.HouseLocation.X
     yH = player.HouseLocation.Y
 
     if xH == x and yH == y :
         upgrade = canIBuySomething(player)
+        currentState = StateType.SearchMineral
         if upgrade != None :
             return create_upgrade_action(upgrade)
 
+    if currentState == StateType.SearchMineral :
+        [xMineral,yMineral] = searchClosestMineral(deserialized_map, x, y)
+        currentState = StateType.GoToMineral
 
-    if currentState == StateType.SearchMineral or currentState == StateType.GoToMineral:
+    if currentState == StateType.GoToMineral:
 
         if player.CarriedRessources == player.CarryingCapacity :
             currentState = StateType.GoToHouse
             
         else :
 
-            [xM,yM] = searchClosestMineral(deserialized_map, x, y)
+            [xM,yM] = [xMineral,yMineral]
 
-            global actualState
+            
             ### IF FULL
-            if player.CarriedRessources > 0.9* player.CarryingCapacity:
-                actualState = StateType.GoToHome
+
             ### ELSE
             ### IF MINERAL FOUND
-            actualState = StateType.GoToMineral
             if distEucl(x,y,xM,yM) > 1 :
                 if y<yM :
                     return create_move_action(Point(x,y+1))
@@ -240,6 +246,8 @@ def bot():
 
     printMap(deserialized_map,x,y)
     print(totalResources)
+    global actualState
+    print(actualState)
 
     #print x
     #print y
