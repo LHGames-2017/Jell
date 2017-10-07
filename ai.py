@@ -123,6 +123,9 @@ def determinateActionToDo(currentState, deserialized_map,player, x, y,  gameInfo
     yH = player.HouseLocation.Y
 
     if xH == x and yH == y :
+        if player.CarriedRessources == player.CarryingCapacity :
+            currentState = StateType.GoToHouse
+            return create_move_action(Point(x-1,y))
         upgrade = canIBuySomething(player)
         currentState = StateType.SearchMineral
         if upgrade != None :
@@ -147,14 +150,14 @@ def determinateActionToDo(currentState, deserialized_map,player, x, y,  gameInfo
             ### ELSE
             ### IF MINERAL FOUND
             if distEucl(x,y,xM,yM) > 1 :
-                if y<yM :
-                    return create_move_action(Point(x,y+1))
-                elif x<xM :
-                    return create_move_action(Point(x+1,y))
-                elif y>yM :
+                if y>yM :
                     return create_move_action(Point(x,y-1))
                 elif x>xM :
                     return create_move_action(Point(x-1,y))
+                elif y<yM :
+                    return create_move_action(Point(x,y+1))
+                elif x<xM :
+                    return create_move_action(Point(x+1,y))
             elif distEucl(x,y,xM,yM) == 1 :
                 if x==xM-1 :
                     return create_collect_action(Point(x+1,y))
@@ -218,7 +221,7 @@ def bot():
     y = pos["Y"]
     house = p["HouseLocation"]
     player = Player(p["Health"], p["MaxHealth"], Point(x,y),
-                    Point(house["X"], house["Y"]),
+                    Point(house["X"], house["Y"]), p["Score"],
                     p["CarriedResources"], p["CarryingCapacity"])
 
     # Map
@@ -252,9 +255,9 @@ def bot():
     bigMap.updateMap(deserialized_map)
     printMap(bigMap,x,y)
 
-    print(totalResources)
-    global actualState
-    print(actualState)
+    #print(totalResources)
+    #global actualState
+    #print(actualState)
 
     #print x
     #print y
