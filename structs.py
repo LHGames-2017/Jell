@@ -1,7 +1,7 @@
 import math
 
 class ActionTypes():
-    DefaultAction, MoveAction, AttackAction, CollectAction, UpgradeAction, StealAction, PurchaseAction, HealAction = range(7)
+    DefaultAction, MoveAction, AttackAction, CollectAction, UpgradeAction, StealAction, PurchaseAction, HealAction = range(8)
 
 
 class UpgradeType():
@@ -81,4 +81,4 @@ class ActionContent(object):
 
     def __init__(self, action_name, content):
         self.ActionName = action_name
-        self.Content = {}
+        self.Content = str(content)
