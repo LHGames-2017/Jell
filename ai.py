@@ -93,7 +93,7 @@ def bot():
 
     printMap(deserialized_map,x,y)
 
-    return create_move_action(Point(x-1,y))
+    return create_move_action(Point(x+1,y))
 
 @app.route("/", methods=["POST"])
 def reponse():
@@ -107,7 +107,7 @@ def printMap(deserialized_map, playerX, playerY):
     for i in range(len(deserialized_map)):
         line = '['
         for j in range(len(deserialized_map[i])):
-            tile = deserialized_map[i][j]
+            tile = deserialized_map[j][i]
             if tile.Content == TileContent.Empty:
                 line += ' '
             elif tile.Content == TileContent.House:
