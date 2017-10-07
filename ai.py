@@ -61,37 +61,58 @@ def distEucl (x1,y1,x2,y2) :
     delta_y = y1 - y2
     return math.sqrt(math.pow(delta_x, 2) + math.pow(delta_y, 2))
 
-def determinateActionToDo(currentState, deserialized_map, x, y, gameInformations = 0) :
+def determinateActionToDo(currentState, deserialized_map,player, x, y,  gameInformations = 0) :
 
     if currentState == StateType.SearchMineral or currentState == StateType.GoToMineral:
 
-        [xM,yM] = searchClosestMineral(deserialized_map, x, y)
+        if player.CarriedRessources == player.CarryingCapacity :
+            currentState = StateType.GoToHouse
+            
+        else :
 
-        ### IF FULL
-        ### ELSE
-        ### IF MINERAL FOUND
-        global actualState
-        actualState = StateType.GoToMineral
-        if distEucl(x,y,xM,yM) > 1 :
-            if x<xM :
-                return create_move_action(Point(x+1,y))
-            elif y<yM :
-                return create_move_action(Point(x,y+1))
-            elif x<xM :
-                return create_move_action(Point(x-1,y))
-            elif y<yM :
-                return create_move_action(Point(x,y-1))
-        elif distEucl(x,y,xM,yM) == 1 :
-            if x==xM-1 :
-                return create_collect_action(Point(x+1,y))
-            if x==xM+1 :
-                return create_collect_action(Point(x+1,y))
-            if y==yM-1 :
-                return create_collect_action(Point(x,y+1))
-            if y==yM-1 :
-                return create_collect_action(Point(x,y-1))
-        ### ELIF MINERAL NOT FOUND
+            [xM,yM] = searchClosestMineral(deserialized_map, x, y)
+
+            ### IF FULL
+            ### ELSE
+            ### IF MINERAL FOUND
+            global actualState
+            actualState = StateType.GoToMineral
+            if distEucl(x,y,xM,yM) > 1 :
+                if x<xM :
+                    return create_move_action(Point(x+1,y))
+                elif y<yM :
+                    return create_move_action(Point(x,y+1))
+                elif x>xM :
+                    return create_move_action(Point(x-1,y))
+                elif y>yM :
+                    return create_move_action(Point(x,y-1))
+            elif distEucl(x,y,xM,yM) == 1 :
+                if x==xM-1 :
+                    return create_collect_action(Point(x+1,y))
+                if x==xM+1 :
+                    return create_collect_action(Point(x-1,y))
+                if y==yM-1 :
+                    return create_collect_action(Point(x,y+1))
+                if y==yM+1 :
+                    return create_collect_action(Point(x,y-1))
+            ### ELIF MINERAL NOT FOUND
         
+    if currentState == StateType.GoToHouse :
+        xH = player.HouseLocation.X
+        yH = player.HouseLocation.Y
+        distance = distEucl(x,y,xH,yH)
+        if distance >= 1 :
+                if distance == 1:
+                    currentState = StateType.SearchMineral
+                if x<xH :
+                    return create_move_action(Point(x+1,y))
+                elif y<yH :
+                    return create_move_action(Point(x,y+1))
+                elif x>xH :
+                    return create_move_action(Point(x-1,y))
+                elif y>yH :
+                    return create_move_action(Point(x,y-1))
+    
     return create_move_action(Point(x,y))
 
 def searchClosestMineral(deserialized_map,x,y):
@@ -170,7 +191,7 @@ def bot():
     #
     #return create_move_action(Point(x,y-1))
 
-    return determinateActionToDo(actualState,deserialized_map ,x ,y)
+    return determinateActionToDo(actualState,deserialized_map, player,x ,y)
 
 @app.route("/", methods=["POST"])
 def reponse():
