@@ -64,7 +64,7 @@ def bot():
     y = pos["Y"]
     house = p["HouseLocation"]
     player = Player(p["Health"], p["MaxHealth"], Point(x,y),
-                    Point(house["X"], house["Y"]),
+                    Point(house["X"], house["Y"]), p["Score"] ,
                     p["CarriedResources"], p["CarryingCapacity"])
 
     # Map
@@ -92,7 +92,21 @@ def bot():
 
     printMap(deserialized_map)
 
-    return create_move_action(Point(x-1,y))
+    print x
+    print y
+
+    #if x == 25 : 
+    #    return create_move_action(Point(x+1,y))
+    #if x == 26 : 
+    #    return create_move_action(Point(x-1,y))
+    if x<28 :
+        return create_move_action(Point(x+1,y))
+    elif y<34 :
+        return create_move_action(Point(x,y+1))
+    elif x==28 and y==34 :
+        return create_collect_action(Point(x,y+1))
+
+    return create_move_action(Point(x,y))
 
 @app.route("/", methods=["POST"])
 def reponse():
