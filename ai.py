@@ -78,7 +78,7 @@ def bot():
     for player_dict in map_json["OtherPlayers"]:
         for player_name in player_dict.keys():
             player_info = player_dict[player_name]
-            if player_info == 'notAPlayer': 
+            if player_info == 'notAPlayer':
                 continue
             p_pos = player_info["Position"]
             player_info = PlayerInfo(player_info["Health"],
@@ -92,7 +92,7 @@ def bot():
     #print x
     #print y
 
-    printMap(deserialized_map)
+    printMap(deserialized_map,x,y)
 
     return create_move_action(Point(x,y-1))
 
@@ -104,7 +104,7 @@ def reponse():
     print("Action demandee")
     return bot()
 
-def printMap(deserialized_map):
+def printMap(deserialized_map, playerX, playerY):
     for i in range(len(deserialized_map)):
         line = '['
         for j in range(len(deserialized_map[i])):
@@ -114,7 +114,7 @@ def printMap(deserialized_map):
             elif tile.Content == TileContent.House:
                 line += 'H'
             elif tile.Content == TileContent.Lava:
-                line += 'L'
+                line += '~'
             elif tile.Content == TileContent.Player:
                 line += 'o'
             elif tile.Content == TileContent.Resource:
