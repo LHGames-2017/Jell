@@ -116,7 +116,7 @@ def bot():
 
     # return decision
 
-    #printMap(deserialized_map,x,y)
+    printMap(deserialized_map,x,y)
 
     #print x
     #print y
@@ -168,4 +168,4 @@ def printMap(deserialized_map, playerX, playerY):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    app.run(host="0.0.0.0", port=3000)
