@@ -71,7 +71,7 @@ def bot():
     serialized_map = map_json["CustomSerializedMap"]
     deserialized_map = deserialize_map(serialized_map)
 
-    printMap(deserialized_map)
+    printMap(deserialized_map, x, y)
 
     otherPlayers = []
 
@@ -86,7 +86,7 @@ def bot():
             otherPlayers.append({player_name: player_info })
 
     # return decision
-    return create_move_action(Point(0,1))
+    return create_move_action(Point(x+1,y))
 
 @app.route("/", methods=["POST"])
 def reponse():
@@ -96,19 +96,23 @@ def reponse():
     print("Action demandee")
     return bot()
 
-def printMap(deserialized_map):
+def printMap(deserialized_map, playerX, playerY):
     for i in range(len(deserialized_map)):
         line = '['
         for j in range(len(deserialized_map[i])):
             tile = deserialized_map[i][j]
-            if tile.Content == TileContent.Empty:
+            tileX = tile.X
+            tileY = tile.Y
+            if playerX == tileX and playerY == tileY:
+                line += 'P'
+            elif tile.Content == TileContent.Empty:
                 line += ' '
+            elif tile.Content == TileContent.Player:
+                line += 'E'
             elif tile.Content == TileContent.House:
                 line += 'H'
             elif tile.Content == TileContent.Lava:
                 line += 'L'
-            elif tile.Content == TileContent.Player:
-                line += 'o'
             elif tile.Content == TileContent.Resource:
                 line += '^'
             elif tile.Content == TileContent.Shop:
