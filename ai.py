@@ -71,6 +71,8 @@ def bot():
     serialized_map = map_json["CustomSerializedMap"]
     deserialized_map = deserialize_map(serialized_map)
 
+    printMap(deserialized_map)
+
     otherPlayers = []
 
     for player_dict in map_json["OtherPlayers"]:
@@ -91,7 +93,33 @@ def reponse():
     """
     Point d'entree appelle par le GameServer
     """
+    print("Action demandee")
     return bot()
+
+def printMap(deserialized_map):
+    for i in range(len(deserialized_map)):
+        line = '['
+        for j in range(len(deserialized_map[i])):
+            tile = deserialized_map[i][j]
+            if tile.Content == TileContent.Empty:
+                line += ' '
+            elif tile.Content == TileContent.House:
+                line += 'H'
+            elif tile.Content == TileContent.Lava:
+                line += 'L'
+            elif tile.Content == TileContent.Player:
+                line += 'o'
+            elif tile.Content == TileContent.Resource:
+                line += '^'
+            elif tile.Content == TileContent.Shop:
+                line += 'S'
+            elif tile.Content == TileContent.Wall:
+                line += '@'
+            else:
+                line += 'B'
+        line += ']'
+        print line
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
