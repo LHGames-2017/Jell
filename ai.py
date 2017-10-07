@@ -78,6 +78,8 @@ def bot():
     for player_dict in map_json["OtherPlayers"]:
         for player_name in player_dict.keys():
             player_info = player_dict[player_name]
+            if p_pos == notAPlayer
+                continue
             p_pos = player_info["Position"]
             player_info = PlayerInfo(player_info["Health"],
                                      player_info["MaxHealth"],
@@ -112,7 +114,7 @@ def printMap(deserialized_map, playerX, playerY):
             elif tile.Content == TileContent.House:
                 line += 'H'
             elif tile.Content == TileContent.Lava:
-                line += 'L'
+                line += '~'
             elif tile.Content == TileContent.Resource:
                 line += '^'
             elif tile.Content == TileContent.Shop:
