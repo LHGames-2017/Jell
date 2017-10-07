@@ -56,25 +56,63 @@ actualState = StateType.SearchMineral
 xMineral = 0
 yMineral = 0
 
-def determinateActionToDo(currentState, x, y, gameInformations = 0) :
+def distEucl (x1,y1,x2,y2) :
+    delta_x = x1 - x2
+    delta_y = y1 - y2
+    return math.sqrt(math.pow(delta_x, 2) + math.pow(delta_y, 2))
+
+def determinateActionToDo(currentState, deserialized_map, x, y, gameInformations = 0) :
 
     if currentState == StateType.SearchMineral or currentState == StateType.GoToMineral:
+
+        [xM,yM] = searchClosestMineral(deserialized_map, x, y)
 
         ### IF FULL
         ### ELSE
         ### IF MINERAL FOUND
         global actualState
         actualState = StateType.GoToMineral
-        if x<28 :
-            return create_move_action(Point(x+1,y))
-        elif y<34 :
-            return create_move_action(Point(x,y+1))
-        elif x==28 and y==34 :
-            return create_collect_action(Point(x,y+1))
+        if distEucl(x,y,xM,yM) > 1 :
+            if x<xM :
+                return create_move_action(Point(x+1,y))
+            elif y<yM :
+                return create_move_action(Point(x,y+1))
+            elif x<xM :
+                return create_move_action(Point(x-1,y))
+            elif y<yM :
+                return create_move_action(Point(x,y-1))
+        elif distEucl(x,y,xM,yM) == 1 :
+            if x==xM-1 :
+                return create_collect_action(Point(x+1,y))
+            if x==xM+1 :
+                return create_collect_action(Point(x+1,y))
+            if y==yM-1 :
+                return create_collect_action(Point(x,y+1))
+            if y==yM-1 :
+                return create_collect_action(Point(x,y-1))
         ### ELIF MINERAL NOT FOUND
         
     return create_move_action(Point(x,y))
 
+def searchClosestMineral(deserialized_map,x,y):
+    distance = 1000
+    xM = 0
+    yM = 0
+    found = False
+    for i in range(len(deserialized_map)):
+        for j in range(len(deserialized_map[i])):
+            tile = deserialized_map[i][j]
+            if tile.Content == TileContent.Resource:
+                tempDist = distEucl(xM, yM , x , y)
+                if tempDist < distance :
+                    distance = tempDist
+                    xM = deserialized_map[i][j].X
+                    yM = deserialized_map[i][j].Y 
+                    found = True
+    if found:
+        return [xM,yM]
+        
+                    
 def bot():
     """
     Main de votre bot.
@@ -132,7 +170,7 @@ def bot():
     #
     #return create_move_action(Point(x,y-1))
 
-    return determinateActionToDo(actualState,x ,y)
+    return determinateActionToDo(actualState,deserialized_map ,x ,y)
 
 @app.route("/", methods=["POST"])
 def reponse():
