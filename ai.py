@@ -131,10 +131,12 @@ def determinateActionToDo(currentState, deserialized_map,player, x, y,  gameInfo
 
             [xM,yM] = searchClosestMineral(deserialized_map, x, y)
 
+            global actualState
             ### IF FULL
+            if player.CarriedRessources > 0.9* player.CarryingCapacity:
+                actualState = StateType.GoToHome
             ### ELSE
             ### IF MINERAL FOUND
-            global actualState
             actualState = StateType.GoToMineral
             if distEucl(x,y,xM,yM) > 1 :
                 if y<yM :
@@ -187,8 +189,8 @@ def searchClosestMineral(deserialized_map,x,y):
                     xM = deserialized_map[i][j].X
                     yM = deserialized_map[i][j].Y 
                     found = True
-    if found:
-        return [xM,yM]
+
+    return [xM,yM] if found else None
         
                     
 def bot():
@@ -267,7 +269,7 @@ def printMap(deserialized_map, playerX, playerY):
     for i in range(len(deserialized_map)):
         line = '['
         for j in range(len(deserialized_map[i])):
-            tile = deserialized_map[i][j]
+            tile = deserialized_map[j][i]
             if tile.Content == TileContent.Empty:
                 line += ' '
             elif tile.Content == TileContent.House:
