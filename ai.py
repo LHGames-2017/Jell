@@ -27,6 +27,9 @@ def create_heal_action():
 def create_purchase_action(item):
     return create_action("PurchaseAction", item)
 
+def create_upgrade_action(upgradetype):
+    return create_action("UpgradeAction", upgradetype)
+
 def deserialize_map(serialized_map):
     """
     Fonction utilitaire pour comprendre la map
@@ -56,12 +59,68 @@ actualState = StateType.SearchMineral
 xMineral = 0
 yMineral = 0
 
+totalResources = 0
+
+lvlMiningSpeed = 0
+lvlCarryingCapacity = 0
+
 def distEucl (x1,y1,x2,y2) :
     delta_x = x1 - x2
     delta_y = y1 - y2
     return math.sqrt(math.pow(delta_x, 2) + math.pow(delta_y, 2))
 
+def canIBuySomething(player):
+
+    global lvlMiningSpeed
+    global lvlCarryingCapacity
+    global totalResources
+
+    if lvlMiningSpeed <= lvlCarryingCapacity :
+        if lvlMiningSpeed == 0 and totalResources >= 15000 :
+            lvlMiningSpeed = lvlMiningSpeed + 1
+            return [UpgradeType.CollectingSpeed] 
+        if lvlMiningSpeed == 1 and totalResources >= 50000 :
+            lvlMiningSpeed = lvlMiningSpeed + 1
+            return [UpgradeType.CollectingSpeed] 
+        if lvlMiningSpeed == 2 and totalResources >= 100000 :
+            lvlMiningSpeed = lvlMiningSpeed + 1
+            return [UpgradeType.CollectingSpeed] 
+        if lvlMiningSpeed == 3 and totalResources >= 250000 :
+            lvlMiningSpeed = lvlMiningSpeed + 1
+            return [UpgradeType.CollectingSpeed] 
+        if lvlMiningSpeed == 4 and totalResources >= 500000 :
+            lvlMiningSpeed = lvlMiningSpeed + 1
+            return [UpgradeType.CollectingSpeed] 
+    else :
+        if lvlCarryingCapacity == 0 and totalResources >= 15000 :
+            lvlCarryingCapacity = lvlCarryingCapacity + 1
+            return [UpgradeType.CarryingCapacity] 
+        if lvlCarryingCapacity == 1 and totalResources >= 50000 :
+            lvlCarryingCapacity = lvlCarryingCapacity + 1
+            return [UpgradeType.CarryingCapacity] 
+        if lvlCarryingCapacity == 2 and totalResources >= 100000 :
+            lvlCarryingCapacity = lvlCarryingCapacity + 1
+            return [UpgradeType.CarryingCapacity] 
+        if lvlCarryingCapacity == 3 and totalResources >= 250000 :
+            lvlCarryingCapacity = lvlCarryingCapacity + 1
+            return [UpgradeType.CarryingCapacity] 
+        if lvlCarryingCapacity == 4 and totalResources >= 500000 :
+            lvlCarryingCapacity = lvlCarryingCapacity + 1
+            return [UpgradeType.CarryingCapacity]
+
+
+    return None
+
 def determinateActionToDo(currentState, deserialized_map,player, x, y,  gameInformations = 0) :
+
+    xH = player.HouseLocation.X
+    yH = player.HouseLocation.Y
+
+    if xH == x and yH == y :
+        upgrade = canIBuySomething(player)
+        if upgrade != None :
+            return create_upgrade_action(upgrade)
+
 
     if currentState == StateType.SearchMineral or currentState == StateType.GoToMineral:
 
@@ -78,14 +137,14 @@ def determinateActionToDo(currentState, deserialized_map,player, x, y,  gameInfo
             global actualState
             actualState = StateType.GoToMineral
             if distEucl(x,y,xM,yM) > 1 :
-                if x<xM :
-                    return create_move_action(Point(x+1,y))
-                elif y<yM :
+                if y<yM :
                     return create_move_action(Point(x,y+1))
-                elif x>xM :
-                    return create_move_action(Point(x-1,y))
+                elif x<xM :
+                    return create_move_action(Point(x+1,y))
                 elif y>yM :
                     return create_move_action(Point(x,y-1))
+                elif x>xM :
+                    return create_move_action(Point(x-1,y))
             elif distEucl(x,y,xM,yM) == 1 :
                 if x==xM-1 :
                     return create_collect_action(Point(x+1,y))
@@ -98,8 +157,6 @@ def determinateActionToDo(currentState, deserialized_map,player, x, y,  gameInfo
             ### ELIF MINERAL NOT FOUND
         
     if currentState == StateType.GoToHouse :
-        xH = player.HouseLocation.X
-        yH = player.HouseLocation.Y
         distance = distEucl(x,y,xH,yH)
         if distance >= 1 :
                 if distance == 1:
@@ -112,7 +169,7 @@ def determinateActionToDo(currentState, deserialized_map,player, x, y,  gameInfo
                     return create_move_action(Point(x-1,y))
                 elif y>yH :
                     return create_move_action(Point(x,y-1))
-    
+        
     return create_move_action(Point(x,y))
 
 def searchClosestMineral(deserialized_map,x,y):
@@ -157,6 +214,10 @@ def bot():
     serialized_map = map_json["CustomSerializedMap"]
     deserialized_map = deserialize_map(serialized_map)
 
+    global totalResources
+
+    totalResources = p["TotalResources"]
+
     #printMap(deserialized_map)
 
     otherPlayers = []
@@ -176,6 +237,7 @@ def bot():
     # return decision
 
     printMap(deserialized_map,x,y)
+    print(totalResources)
 
     #print x
     #print y
