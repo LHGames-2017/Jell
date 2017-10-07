@@ -1,9 +1,11 @@
 from flask import Flask, request
 from structs import *
 import json
-import numpy
+#import numpy
 
 app = Flask(__name__)
+
+bigMap = BigMap()
 
 def create_action(action_type, target):
     actionContent = ActionContent(action_type, target.__dict__)
@@ -203,6 +205,7 @@ def bot():
     """
     Main de votre bot.
     """
+
     map_json = request.form["map"]
 
     # Player info
@@ -215,7 +218,7 @@ def bot():
     y = pos["Y"]
     house = p["HouseLocation"]
     player = Player(p["Health"], p["MaxHealth"], Point(x,y),
-                    Point(house["X"], house["Y"]), p["Score"] ,
+                    Point(house["X"], house["Y"]),
                     p["CarriedResources"], p["CarryingCapacity"])
 
     # Map
@@ -229,6 +232,10 @@ def bot():
     #printMap(deserialized_map)
 
     otherPlayers = []
+    
+    if not bigMap.initialized:
+        bigMap.initMap(deserialized_map)
+        bigMap.initialized = True
 
     for player_dict in map_json["OtherPlayers"]:
         for player_name in player_dict.keys():
@@ -242,9 +249,9 @@ def bot():
 
             otherPlayers.append({player_name: player_info })
 
-    # return decision
+    bigMap.updateMap(deserialized_map)
+    printMap(bigMap,x,y)
 
-    printMap(deserialized_map,x,y)
     print(totalResources)
     global actualState
     print(actualState)
@@ -274,23 +281,23 @@ def reponse():
     return bot()
 
 def printMap(deserialized_map, playerX, playerY):
-    for i in range(len(deserialized_map)):
+    for i in range(len(deserialized_map.Map)):
         line = '['
-        for j in range(len(deserialized_map[i])):
-            tile = deserialized_map[j][i]
-            if tile.Content == TileContent.Empty:
+        for j in range(len(deserialized_map.Map[i])):
+            tile = deserialized_map.Map[i][j]
+            if tile == TileContent.Empty:
                 line += ' '
-            elif tile.Content == TileContent.House:
+            elif tile == TileContent.House:
                 line += 'H'
-            elif tile.Content == TileContent.Lava:
+            elif tile == TileContent.Lava:
                 line += '~'
-            elif tile.Content == TileContent.Player:
+            elif tile == TileContent.Player:
                 line += 'o'
-            elif tile.Content == TileContent.Resource:
+            elif tile == TileContent.Resource:
                 line += '^'
-            elif tile.Content == TileContent.Shop:
+            elif tile == TileContent.Shop:
                 line += 'S'
-            elif tile.Content == TileContent.Wall:
+            elif tile == TileContent.Wall:
                 line += '@'
             else:
                 line += 'B'
