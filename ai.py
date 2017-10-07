@@ -75,15 +75,17 @@ def bot():
 
     otherPlayers = []
 
-#    for player_dict in map_json["OtherPlayers"]:
-#        for player_name in player_dict.keys():
-#            player_info = player_dict[player_name]
-#            p_pos = player_info["Position"]
-#            player_info = PlayerInfo(player_info["Health"],
-#                                     player_info["MaxHealth"],
-#                                     Point(p_pos["X"], p_pos["Y"]))
-#
-#            otherPlayers.append({player_name: player_info })
+    for player_dict in map_json["OtherPlayers"]:
+        for player_name in player_dict.keys():
+            player_info = player_dict[player_name]
+            if player_info == 'notAPlayer': 
+                continue
+            p_pos = player_info["Position"]
+            player_info = PlayerInfo(player_info["Health"],
+                                     player_info["MaxHealth"],
+                                     Point(p_pos["X"], p_pos["Y"]))
+
+            otherPlayers.append({player_name: player_info })
 
     # return decision
 
@@ -92,7 +94,7 @@ def bot():
 
     printMap(deserialized_map)
 
-    return create_move_action(Point(x-1,y))
+    return create_move_action(Point(x,y-1))
 
 @app.route("/", methods=["POST"])
 def reponse():
